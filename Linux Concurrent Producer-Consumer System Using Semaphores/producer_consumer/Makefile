@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -pthread
 TARGET = pc
-OBJS = main.o buffer.o producer.o consumer.o semaphores.o
+OBJS = main.o buffer.o producer.o consumer.o semaphores.o logger.o
 
 all: $(TARGET)
 

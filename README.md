@@ -16,7 +16,7 @@
 ---
 
 ## Description
-A fully synchronized concurrent producer-consumer system implemented in C on Ubuntu Linux using POSIX semaphores and pthreads. Demonstrates mutual exclusion, process synchronization, bounded buffer management, and prevention of race conditions and deadlocks.
+A fully synchronized concurrent producer-consumer system implemented in C on Ubuntu Linux using POSIX semaphores and pthreads. Demonstrates mutual exclusion, process synchronization, bounded buffer management, file I/O logging, and prevention of race conditions and deadlocks — covering all six course outcomes of 25CS2104E.
 
 ---
 
@@ -28,12 +28,14 @@ A fully synchronized concurrent producer-consumer system implemented in C on Ubu
     │   ├── main.c          — argument parsing, thread creation/joining, summary
     │   ├── buffer.c        — circular buffer implementation
     │   ├── buffer.h        — buffer declarations
-    │   ├── producer.c      — producer thread logic
+    │   ├── producer.c      — producer thread logic with lifecycle comments
     │   ├── producer.h      — producer declarations
-    │   ├── consumer.c      — consumer thread logic
+    │   ├── consumer.c      — consumer thread logic with lifecycle comments
     │   ├── consumer.h      — consumer declarations
     │   ├── semaphores.c    — semaphore init and destroy
     │   ├── semaphores.h    — semaphore declarations
+    │   ├── logger.c        — file I/O logging implementation
+    │   ├── logger.h        — logger declarations
     │   └── Makefile        — build automation with object files
     ├── screenshots/
     │   ├── 1_project_structure.png
@@ -45,6 +47,19 @@ A fully synchronized concurrent producer-consumer system implemented in C on Ubu
     │   ├── 7_strace.png
     │   └── 8_gdb.png
     └── README.md
+
+---
+
+## Course Outcome Mapping
+
+| CO | Description | How This Project Covers It |
+|----|-------------|---------------------------|
+| CO1 | OS as a layered service abstraction — syscall interface, kernel vs user space | Semaphore operations (`sem_wait`, `sem_post`) and thread calls are kernel-mediated syscalls. `strace` is used to observe user-to-kernel transitions. See `7_strace.png` and CO1 comment in `main.c` |
+| CO2 | Process control primitives — lifecycle, state transitions | Thread lifecycle mirrors process lifecycle: Created → Running → Blocked (on `sem_wait`) → Ready → Terminated. `pthread_create` and `pthread_join` parallel `fork` and `wait`. See CO2 comments in `producer.c` and `consumer.c` |
+| CO3 | IPC mechanisms — shared memory, synchronization | The shared circular buffer serves as the shared memory IPC medium between producer and consumer threads. Three semaphores coordinate access, directly demonstrating IPC synchronization |
+| CO4 | Virtual memory — address space, dynamic allocation | The circular buffer occupies the heap segment of the process address space. Thread stacks are allocated separately in virtual memory, demonstrating per-thread address space layout |
+| CO5 | File systems and File I/O | `logger.c` implements file I/O using `fopen`, `fprintf`, and `fclose` to write timestamped events to `pc_log.txt`, demonstrating Linux file abstraction and buffered I/O syscalls |
+| CO6 | Concurrency and synchronization — threads, semaphores, deadlocks | Primary CO. Full implementation of POSIX threads, counting semaphores (`empty`, `full`), binary semaphore (`mutex`), critical section protection, and deadlock-free design through correct semaphore ordering |
 
 ---
 
@@ -78,13 +93,15 @@ A fully synchronized concurrent producer-consumer system implemented in C on Ubu
 ---
 
 ## OS Concepts Demonstrated
-- Bounded buffer with circular array
-- POSIX semaphores (sem_init, sem_wait, sem_post, sem_destroy)
-- POSIX threads (pthread_create, pthread_join)
-- Mutual exclusion and critical section protection
-- Deadlock prevention through correct semaphore ordering
-- System call tracing with strace
-- Multi-thread debugging with GDB
+- Bounded buffer with circular array (CO3, CO4)
+- POSIX semaphores — `sem_init`, `sem_wait`, `sem_post`, `sem_destroy` (CO6)
+- POSIX threads — `pthread_create`, `pthread_join` (CO2, CO6)
+- Mutual exclusion and critical section protection (CO6)
+- Deadlock prevention through correct semaphore ordering (CO6)
+- User-space to kernel-space transition via syscalls (CO1)
+- File I/O logging with timestamps to `pc_log.txt` (CO5)
+- System call tracing with `strace` (CO1)
+- Multi-thread debugging with `GDB` (CO2, CO6)
 
 ---
 
